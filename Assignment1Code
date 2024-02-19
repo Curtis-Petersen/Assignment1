@@ -1,0 +1,137 @@
+import os
+
+# Data file retrieval
+def productFile(filePath):
+    products = []
+    with open(filePath, 'r') as file:
+        for line in file:
+            attributes = line.strip().split(', ')
+            attributes[0] = int(attributes[0])  
+            attributes[2] = float(attributes[2]) 
+            products.append(tuple(attributes))
+    return products
+
+def saveProducts(filePath, products):
+    with open(filePath, 'w') as file:
+        for product in products:
+            file.write(', '.join(map(str, product)) + '\n')
+
+def insertProduct(products, new_product):
+    products.append(new_product)
+
+def updateProduct(products, product_id, new_attributes):
+    for i, product in enumerate(products):
+        if product[0] == product_id: 
+            products[i] = new_attributes
+            break
+
+def deleteProduct(products, product_id):
+    for product in products:
+        if product[0] == product_id:
+            products.remove(product)
+            break
+
+def searchIDs(products, product_id):
+    for product in products:
+        if product[0] == product_id:
+            return product
+    return None
+
+def searchNames(products, product_name):
+    found_products = []
+    for product in products:
+        if product_name.lower() in product[1].lower():
+            found_products.append(product)
+    return found_products
+
+# Sorting algo - bubblesort
+def bubbleSort(products):
+    n = len(products)
+    for i in range(n - 1):
+        for j in range(0, n - i - 1):
+            if products[j][2] > products[j + 1][2]:
+                products[j], products[j + 1] = products[j + 1], products[j]
+
+def menuOptions():
+    print("\nMenu Options:")
+    print("1. Insert a new product")
+    print("2. Update an existing product")
+    print("3. Delete a product")
+    print("4. Search for a product by ID")
+    print("5. Search for products by name")
+    print("6. Sort products by price")
+    print("7. Exit")
+
+# Main 
+fileName = input("Please enter the name of the file (with extension) in the Downloads folder: ")
+
+downloads_folder = os.path.expanduser("~/Downloads")
+filePath = os.path.join(downloads_folder, fileName)
+
+if not os.path.exists(filePath):
+    print(f"The file {fileName} does not exist in the Downloads folder.")
+    exit()
+
+# Load products from the file
+products = productFile(filePath)
+
+# Sort products by price using Bubble Sort
+bubbleSort(products)
+
+while True:
+    
+    # Testing 
+    # Display the products
+    print("\nProducts:")
+    for product in products:
+        print(product)
+
+    menuOptions()
+    choice = input("Please enter an operation number: ")
+
+    if choice == '1':  # Insert a new product
+        id_input = int(input("Enter ID of the new product: "))
+        name_input = input("Enter name of the new product: ")
+        price_input = float(input("Enter price of the new product: "))
+        category_input = input("Enter category of the new product: ")
+        new_product = (id_input, name_input, price_input, category_input)
+        insertProduct(products, new_product)
+        print("New product inserted successfully!")
+    elif choice == '2':  # Update an existing product
+        id_input = int(input("Enter ID of the product to update: "))
+        name_input = input("Enter new name of the product: ")
+        price_input = float(input("Enter new price of the product: "))
+        category_input = input("Enter new category of the product: ")
+        new_attributes = (id_input, name_input, price_input, category_input)
+        updateProduct(products, id_input, new_attributes)
+        print("Product updated successfully!")
+    elif choice == '3':  # Delete a product
+        id_input = int(input("Enter ID of the product to delete: "))
+        deleteProduct(products, id_input)
+        print("Product deleted successfully!")
+    elif choice == '4':  # Search for a product by ID
+        id_input = int(input("Enter ID of the product to search: "))
+        found_product = searchIDs(products, id_input)
+        if found_product:
+            print("Product found:", found_product)
+        else:
+            print("Product not found.")
+    elif choice == '5':  # Search for products by name
+        name_input = input("Enter name of the product to search: ")
+        found_products = searchNames(products, name_input)
+        if found_products:
+            print("Products found:", found_products)
+        else:
+            print("No products found with the given name.")
+    elif choice == '6':  # Sort products by price
+        bubbleSort(products)
+        print("Products sorted by price.")
+    elif choice == '7':  # Exit
+        print("Exiting the program.")
+        break
+    else:
+        print("Invalid choice. Please enter a number from 1 to 6.")
+
+    # Save the modified products back to the file
+    saveProducts(filePath, products)
+    
